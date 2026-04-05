@@ -4,7 +4,7 @@
 docker image pull mongo:latest
 
 # Membuat container MongoDB dengan nama "contohmongo"
-$ docker container create --name contohmongo --publish 27017:27017 --env MONGO_INITDB_ROOT_USERNAME=elham --env MONGO_INITDB_ROOT_PASSWORD=elham mongo:latest
+docker container create --name contohmongo --publish 27017:27017 --env MONGO_INITDB_ROOT_USERNAME=elham --env MONGO_INITDB_ROOT_PASSWORD=elham mongo:latest
 
 docker container create \
   --name contohmongo \
