@@ -1,39 +1,35 @@
-# Menghentikan container MongoDB (mongovolume)
-# Tujuannya agar data konsisten saat dibackup (tidak sedang ditulis)
+# Stop MongoDB agar data konsisten saat backup
 docker container stop mongovolume
 
-# Membuat container sementara "nginxbackup"
-# MSYS_NO_PATHCONV=1 -> mencegah Git Bash mengubah path
-MSYS_NO_PATHCONV=1 docker container create --name nginxbackup \
-
-  # Bind mount ke folder lokal untuk menyimpan file backup
-  --mount "type=bind,source=/c/Users/muham/Documents/Web/Docker - PZN/backup,destination=/backup" \
-
-  # Mount volume MongoDB agar bisa diakses dari container ini
-  --mount "type=volume,source=mongodata,destination=/data" \
-
-  # Menggunakan image nginx (sebagai container helper)
-  nginx:latest
+# Membuat container backup dengan bind mount & volume MongoDB (disable path convert Git Bash)
+MSYS_NO_PATHCONV=1 docker container create --name nginxbackup --mount "type=bind,source=/c/Users/muham/Documents/Web/Docker - PZN/backup,destination=/backup" --mount "type=volume,source=mongodata,destination=/data" nginx:latest
 
 # Menjalankan container backup
 docker container start nginxbackup
 
-# Masuk ke dalam container
-# Gunakan /bin/sh jika /bin/bash tidak tersedia
+# Masuk ke container (gunakan bash/sh)
 MSYS_NO_PATHCONV=1 docker container exec -it nginxbackup /bin/bash
 
-# Membuat file backup dalam bentuk tar.gz
-# /data   -> sumber data (volume MongoDB)
-# /backup -> tujuan (folder lokal)
+# Membuat file backup dari volume MongoDB ke folder lokal
 tar cvf /backup/backup.tar.gz /data
 
-# Keluar dari container (ketik: exit), lalu lanjut:
-
-# Menghentikan container backup
+# Stop container backup
 docker container stop nginxbackup
 
-# Menghapus container backup (karena hanya sementara)
+# Hapus container backup karena hanya sementara
 docker container rm nginxbackup
 
 # Menjalankan kembali MongoDB
+docker container start mongovolume
+
+# Pull image Ubuntu terbaru
+docker image pull ubuntu:latest
+
+# Stop MongoDB lagi untuk backup kedua
+docker container stop mongovolume
+
+# Backup langsung tanpa masuk container (run + auto remove)
+MSYS_NO_PATHCONV=1 docker container run --rm --name ubuntubackup --mount "type=bind,source=/c/Users/muham/Documents/Web/Docker - PZN/backup,destination=/backup" --mount "type=volume,source=mongodata,destination=/data" ubuntu:latest tar cvf /backup/backup-lagi.tar.gz /data
+
+# Jalankan kembali MongoDB
 docker container start mongovolume
