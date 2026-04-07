@@ -13,3 +13,5 @@ docker container logs command
 docker build -t elham/label label
 
 docker image inspect elham/label
+
+docker build -t elham/add add
